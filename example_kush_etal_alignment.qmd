@@ -1,70 +1,86 @@
-# Load packages
-library(mirt)
-library(ggplot2)
-library(umx)
-library(R2spa)
+---
+title: "Alignment Optimization"
+format:
+  gfm:
+    toc: true
+  pdf:
+    toc: true
+---
 
-# Data import (from https://github.com/jmk7cj/SEM-mnlfa)
+## Load Packages
+
+```{r}
+library(mirt)       # for IRT analyses
+# install.packages("remotes")
+# remotes::install_github("marklhc/pinsearch")
+library(pinsearch)  # for noninvariance effect size
+library(ggplot2)    # for plotting
+library(umx)        # for analyzing harmonized scores
+```
+
+## Import Data
+
+Data can be downloaded from <https://github.com/jmk7cj/SEM-mnlfa>.
+
+```{r}
 data <- read.csv(here::here("SEM-mnlfa", "data.csv"))
-# Sort data by Study ID
-data <- data[order(data$study_id), ]
+# Define grouping variable
+data$group <- data$study_id
+# Sort data by group
+data <- data[order(data$group), ]
 head(data)
 # Sample sizes
 # Study 1 = FAST; Study 2 = LIFT; Study 3 = PIRC1;
 # Study 4 = PIRC2; Study 5 = SAFE
-table(data[c("study_id", "race")])
-# Note that the sample sizes are too small for race = black for the LIFT study,
-# and for race = white for the SAFE study, so we do not include those in
-# the configural model
-item_names <- names(data)[5:13]
+table(data$study_id)
+item_names <- names(data)[5:13]  # save item names
+```
 
-# Configural model (using `mirt`)
-# 1. Create grouping variable combining study_id, sex, and race
-# data$group <- paste(data$study_id, data$sex, data$race, sep = "_")
-data$group <- data$study_id
-group_names <- unique(data$group)
-# 1b. Select only groups with enough data
-selected_groups <- which(table(data$group) >= 50)
-# data_sub <- subset(data, subset = group %in% names(selected_groups))
-# 2. Run separate mirts (2PL)
-# mirt::multipleGroup(data_sub[5:13], group = data_sub$group)
+## Configural Model
+
+Run separate mirts (2PL)
+
+```{r}
+groups <- unique(data$group)
 # Initialize output
 # a. number of observations per group and item
 item_n <- matrix(NA,
-    nrow = length(selected_groups),
+    nrow = length(groups),
     ncol = length(item_names),
-    dimnames = list(names(selected_groups), item_names))
-# b. matrix of loadings and intercepts
+    dimnames = list(groups, item_names))
+# b. Matrix of loadings and intercepts
 lambda <- nu <- item_n
-# for (g in names(selected_groups)) {
-#     datg <- data[data$group == g, item_names]
-#     # Drop completely missing items
-#     item_n[g, ] <- colSums(!is.na(datg))
-#     itemsg <- which(colSums(!is.na(datg)) > 0)
-#     modg <- mirt(datg[names(itemsg)], itemtype = "2PL")
-#     coefg <- coef(modg, simplify = TRUE)
-#     lambda[g, names(itemsg)] <- coefg$items[, "a1"]
-#     nu[g, names(itemsg)] <- coefg$items[, "d"]
-# }
-# The coefficients are not stable.
-# We use a Bayesian prior to obtain stablized coefficients
-# bmod <- "
-#   f = 1-[I]
-#   PRIOR = (1-[I], a1, lnorm, 0, 1), (1-[I], d, norm, 0, 5)
-# "
-for (g in names(selected_groups)) {
-    datg <- data[data$group == g, item_names]
+# c. Loop over groups, fitting a 2PL model to each
+for (g in seq_along(groups)) {
+    datg <- data[data$group == groups[g], item_names]
     # Drop completely missing items
     item_n[g, ] <- colSums(!is.na(datg))
     itemsg <- which(colSums(!is.na(datg)) > 0)
-    # modg <- gsub("\\[I\\]", replacement = length(itemsg), bmod)
     fitg <- mirt(datg[names(itemsg)], model = 1,
                  itemtype = "2PL")
     coefg <- coef(fitg, simplify = TRUE)
     lambda[g, names(itemsg)] <- coefg$items[, "a1"]
     nu[g, names(itemsg)] <- coefg$items[, "d"]
 }
-# 3. Alignment optimization (not converging)
+```
+
+### Configural Parameters
+
+```{r}
+#| label: tbl-lambda
+#| tbl-cap: Configural Loadings
+knitr::kable(lambda, digits = 2)
+```
+
+```{r}
+#| label: tbl-nu
+#| tbl-cap: Configural Intercepts
+knitr::kable(lambda, digits = 2)
+```
+
+## Alignment Optimization
+
+```{r}
 aligned <- sirt::invariance.alignment(
     lambda = lambda,
     nu = nu,
@@ -73,9 +89,32 @@ aligned <- sirt::invariance.alignment(
     eps = .0001,
     control = list(maxit = 10000)
 )
-# 4. Effect size
-thres <- aligned$nu.aligned[, c(1, 3:9)]
-colnames(thres) <- seq_len(ncol(thres))
+```
+
+```{r}
+#| label: tbl-alambda
+#| tbl-cap: Aligned Loadings
+knitr::kable(aligned$lambda.aligned, digits = 2)
+```
+
+```{r}
+#| label: tbl-anu
+#| tbl-cap: Aligned Intercepts
+knitr::kable(aligned$nu.aligned, digits = 2)
+```
+
+```{r}
+#| label: tbl-apars
+#| tbl-cap: Aligned Latent means and variances
+knitr::kable(aligned$pars, digits = 2)
+```
+
+### Quality: Effect size of noninvariance
+
+```{r}
+# Note: we need to do this twice as `pinsearch::fmacs()`
+# does not handle NAs in the input, so we need to
+# treat item 2 (not in Study 1) separately
 # pooled SD
 vars <- apply(data[item_names],
     MARGIN = 2,
@@ -89,157 +128,188 @@ pooled_sd <- sqrt(
     colSums(vars * (item_n2 - 1), na.rm = TRUE) /
         colSums(item_n2 - 1, na.rm = TRUE)
 )
+
+# a. Items 1, 3-9
+thres1 <- aligned$nu.aligned[, c(1, 3:9)]
+colnames(thres1) <- seq_len(ncol(thres1))
 # Noninvariance effect size for items 1, 3-9
-pinsearch::fmacs_ordered(
-    thresholds = thres,
+f1 <- pinsearch::fmacs_ordered(
+    thresholds = thres1,
     loadings = aligned$lambda.aligned[, c(1, 3:9)],
     link = "logit",
     pooled_item_sd = pooled_sd[c(1, 3:9)]
 )
-# Noninvariance effect size for item 2
+# b. Item 2
 thres2 <- aligned$nu.aligned[-1, 2, drop = FALSE]
 colnames(thres2) <- 1
-pinsearch::fmacs_ordered(
+f2 <- pinsearch::fmacs_ordered(
     thresholds = thres2,
     loadings = aligned$lambda.aligned[-1, 2, drop = FALSE],
     link = "logit",
     pooled_item_sd = pooled_sd[2]
 )
-# The magnitude of noninvariance effect size is not trivial (with fmacs > .1)
-# for all items.
+# Combine to form one effect size vector
+f_effsize <- cbind(f1[1, 1, drop = FALSE], f2, f1[1, -1, drop = FALSE])
+knitr::kable(f_effsize, digits = 2)
+```
 
-# 5. Compute factor scores
-# 5a. Refit the configural model, with latent means and variances from the
-#     aligned parameters
-# 5b. Save factor scores, using the same prior mean and variance
-(aligned_pars <- aligned$pars)
+The magnitude of noninvariance effect size is not trivial (with fmacs > .1) for most items.
+
+## Compute Harmonized Factor Scores
+
+```{r}
+# Refit the configural model, with latent means and variances
+# from the aligned parameters
+aligned_pars <- aligned$pars
+# Define a syntax template to allow latent means and
+# variances to be substituted by the aligned values
 mod <- "
   f = 1-[I]
   START = (GROUP, MEAN_1, [mu]), (GROUP, COV_11, [sigma2])
 "
 # Substitute into the aligned means and variances
-fsg <- NULL
-for (g in names(selected_groups)) {
-    datg <- data[data$group == g, item_names]
+fsg <- NULL  # place holder for factor scores
+for (g in seq_along(groups)) {
+    datg <- data[data$group == groups[g], item_names]
     # Drop completely missing items
     itemsg <- which(item_n[g, ] > 0)
     modg <- gsub("\\[I\\]", replacement = length(itemsg), mod)
     modg <- gsub("\\[mu\\]", replacement = aligned_pars[g, 1], modg)
-    modg <- gsub("\\[sigma2\\]", replacement = aligned_pars[g, 2], modg)
+    # Note: aligned psi is latent SD, but `mirt`
+    # needs latent variance (i.e., SD^2)
+    modg <- gsub("\\[sigma2\\]", replacement = aligned_pars[g, 2]^2, modg)
     fitg <- mirt(datg[names(itemsg)], model = modg,
                  itemtype = "2PL")
     fsg <- rbind(
         fsg,
         data.frame(
             fscores(fitg,
-                method = "EAP", mean = 0, cov = 1, full.scores.SE = TRUE
+                method = "EAP", full.scores.SE = TRUE
             ),
-            group = g
+            group = groups[g],
+            mean_eta = aligned_pars[g, 1],
+            sd_eta = aligned_pars[g, 2]
         )
     )
 }
+```
+
+### Reliability
+
+```{r}
 # Average reliability
-var(fsg[, 1], na.rm = TRUE) /
+rel_avg <- var(fsg[, 1], na.rm = TRUE) /
     (var(fsg[, 1], na.rm = TRUE) + mean(fsg[, 2]^2, na.rm = TRUE))
+rel_avg
 # Group-specific reliability
 relg <- tapply(fsg, INDEX = fsg$group,
     FUN = \(x) var(x[, 1], na.rm = TRUE) /
         (var(x[, 1], na.rm = TRUE) + mean(x[, 2]^2, na.rm = TRUE)))
+relg
+```
 
-# 6. Naive second-stage analysis
-# 6a. Descriptives
+## Analyses of Harmonized Scores
+
+### Descriptives
+
+```{r}
 ggplot(fsg, aes(x = f)) +
     geom_histogram() +
     facet_wrap(~ group) +
     labs(x = "EAP score")
-# 6b. Merged with other variables
+```
+
+### Factor score regression (no reliability adjustment)
+
+Using EAP scores to predict high school completion with probit regression
+
+```{r}
+# Merged with other variables
 # Warning: the code requires data to be sorted by study_id before analyses
 data <- cbind(data, fsg)
-# 6c. Recode discrete variable to be used with OpenMx
+# GLM (probit regression); interaction not significant
+m_int <- glm(hs ~ f * study_id, data = data, family = binomial("probit"))
+anova(m_int)
+m_main <- glm(hs ~ f + study_id, data = data, family = binomial("probit"))
+anova(m_main)
+summary(m_main)
+```
+
+Using `umx` (without unreliability adjustment)
+
+```{r}
+# Recode discrete variable to be used with OpenMx
 data$hs2 <- mxFactor(data$hs, levels = c(0, 1))
-# 6d. Pooled analysis without adjusting for unreliability
+# Create dummy variables for Study ID
+data <- cbind(data, model.matrix(~ study_id, data = data)[, -1])
+# Pooled analysis without adjusting for unreliability
 # TOCA-R -> high school completion
 probitreg_umx <- umxRAM("
-  hs2 ~ f
+  hs2 ~ f + study_idLIFT + study_idPIRC1 + study_idPIRC2 + study_idSAFE
   hs2 ~ 0 * 1
   hs2 ~~ 1 * hs2
 ",
-    data = data)
-plot(probitreg_umx)  # path diagram
+    data = data,
+    tryHard = "ordinal"  # try hard for convergence
+)
+# plot(probitreg_umx)  # path diagram
+```
 
-# 7. Second stage analysis, adjusting for measurement error
-# 7b. Define loading and error variances
-# Loading = Latent variance (for scoring) - SE^2
-data$rel_f <- 1 - data$SE_f^2
+### Two-Stage Path Analysis
+
+Adjusting for measurement error
+
+```{r}
+# Define loading and error variances
+# Loading = Latent variance - SE^2
+data$rel_f <- data$sd_eta^2 - data$SE_f^2
+# Error variance = SE^2 * reliability
 data$ev_f <- data$SE_f^2 * data$rel_f
-# 7c. Drop rows with missing rel_f
+# Drop rows with missing rel_f
 data2 <- data[!is.na(data$rel_f), ]
-# 7d. Incorporate measurement model for factor scores
-# Note: as EAP scores are only used as a predictor, the
-#       unstandardized coefficients are not affected by
-#       the measurement model.
+# Incorporate measurement model for factor scores
 probitreg_2spa <- umxRAM(
     "2spa",
-    umxPath("eta", to = "hs2", values = -0.23),
+    # Main effects of EAP scores and study indicators
+    umxPath(c("eta", "study_idLIFT", "study_idPIRC1",
+              "study_idPIRC2", "study_idSAFE"),
+            to = "hs2"),
+    # Loading = reliability (as definition variable)
     umxPath("eta", to = "f", labels = "data.rel_f", free = FALSE),
+    # Error variance (as definition variable)
     umxPath(var = "f", labels = "data.ev_f", free = FALSE),
-    umxPath(v.m. = "eta", values = c(1.317, -0.784)),
+    # Covariances of predictors
+    umxPath(unique.pairs = c("eta", "study_idLIFT", "study_idPIRC1",
+                             "study_idPIRC2", "study_idSAFE")),
+    # Means of predictors
+    umxPath(means = c("eta", "study_idLIFT", "study_idPIRC1",
+                      "study_idPIRC2", "study_idSAFE")),
+    # For model identification: Fix latent variate
+    # to be standard normal
     umxPath(v1m0 = "hs2"),
     data = data2,
     tryHard = "ordinal"
 )
+```
 
-# 8. Adding grouping variable
-data$gp <- as.numeric(factor(data$group))
-probitreg_umx <- umxRAM(
-    "fspa",
-    umxPath("f", to = "hs2"),
-    umxPath(v1m0 = "hs2"),
-    umxPath(v.m. = "f"),
-    data = data,
-    tryHard = "ordinal",
-    group = "gp")
+## Sensitivity Analysis
 
-# Optimization by hand
-# sim_fun <- function(x, lam, nu, wgt, eps = 0.001) {
-#     n_gps <- nrow(lam)
-#     dpsi <- x[seq_len(n_gps - 1)]
-#     dalpha <- x[seq_len(n_gps - 1) + n_gps - 1]
-#     new_lam <- lam / (1 + c(0, dpsi))
-#     new_nu <- nu - c(0, dalpha) * new_lam
-#     tnew_lam <- t(new_lam)
-#     tnew_nu <- t(new_nu)
-#     loss <- 0
-#     for (g in seq_len(n_gps - 1)) {
-#         g1 <- (g + 1):n_gps
-#         loss <- loss +
-#             sum(
-#                 sqrt(sqrt((tnew_lam[, g1] - tnew_lam[, g])^2 + eps)),
-#                 sqrt(sqrt((tnew_nu[, g1] - tnew_nu[, g])^2 + eps)),
-#                 na.rm = TRUE
-#             )
-#     }
-#     loss
-# }
+Using sum/mean scores
 
-# opt <- optim(rep(0.01, 30), sim_fun,
-#              lam = lambda, nu = nu, wgt = sqrt(item_n), eps = 0.0001,
-#              method = "L-BFGS-B",
-#              control = list(maxit = 10000))
+```{r}
+data$toca_mean <- rowMeans(data[item_names], na.rm = TRUE)
+# Scatterplot
+plot(x = data$toca_mean, y = fsg[, 1], xlab = "Mean scores", ylab = "EAP scores")
+cor(data$toca_mean, fsg[, 1], use = "complete")
+```
 
-# Exclude Study 1
-sirt::invariance.alignment(
-    lambda = lambda[-(1:4), ],
-    nu = nu[-(1:4), ],
-    wgt = sqrt(item_n[-(1:4), ]),
-    optimizer = "nlminb",
-    control = list(iter.max = 1000)
-)
+Probit regression with mean scores; note that the scale of the predictors are different, so the coefficients are not comparable.
 
-library(blavaan)
-bcfa("
-  f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9
-", data = data[data$group %in% names(selected_groups), item_names] |>
-    setNames(c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9")),
-    ordered = TRUE,
-    n.chains = 1, burnin = 200, sample = 200)
+```{r}
+# GLM (probit regression); interaction not significant
+m_int_meanscore <- glm(hs ~ toca_mean * study_id, data = data, family = binomial("probit"))
+anova(m_int_meanscore)
+m_main_meanscore <- glm(hs ~ toca_mean + study_id, data = data, family = binomial("probit"))
+anova(m_main_meanscore)
+summary(m_main_meanscore)
+```
