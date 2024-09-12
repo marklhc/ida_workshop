@@ -355,7 +355,7 @@ for (g in seq_along(groups)) {
 ### Configural Parameters
 
 ``` r
-knitr::kable(lambda, digits = 2)
+knitr::kable(t(lambda), digits = 2)
 ```
 
 <div id="tbl-lambda">
@@ -364,20 +364,24 @@ Table 1: Configural Loadings
 
 <div class="cell-output-display">
 
-|  | T_TOCA_breakrule | T_TOCA_harmpro | T_TOCA_breakthg | T_TOCA_takeprop | T_TOCA_fight | T_TOCA_lies | T_TOCA_yell | T_TOCA_stub | T_TOCA_teas |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| FAST | 3.82 | NA | 2.86 | 3.12 | 2.22 | 2.65 | 3.02 | 3.06 | 2.44 |
-| LIFT | 2.57 | 5.28 | 3.15 | 2.81 | 4.08 | 2.68 | 5.34 | 2.48 | 2.14 |
-| PIRC1 | 3.27 | 1.91 | 3.77 | 3.86 | 2.86 | 3.20 | 2.71 | 2.50 | 3.01 |
-| PIRC2 | 2.65 | 4.27 | 4.69 | 4.19 | 4.28 | 3.56 | 2.75 | 1.92 | 2.76 |
-| SAFE | 2.94 | 4.88 | 4.34 | 6.19 | 3.51 | 3.15 | 3.84 | 2.02 | 2.74 |
+|                  | FAST | LIFT | PIRC1 | PIRC2 | SAFE |
+|:-----------------|-----:|-----:|------:|------:|-----:|
+| T_TOCA_breakrule | 3.82 | 2.57 |  3.27 |  2.65 | 2.94 |
+| T_TOCA_harmpro   |   NA | 5.28 |  1.91 |  4.27 | 4.88 |
+| T_TOCA_breakthg  | 2.86 | 3.15 |  3.77 |  4.69 | 4.34 |
+| T_TOCA_takeprop  | 3.12 | 2.81 |  3.86 |  4.19 | 6.19 |
+| T_TOCA_fight     | 2.22 | 4.08 |  2.86 |  4.28 | 3.51 |
+| T_TOCA_lies      | 2.65 | 2.68 |  3.20 |  3.56 | 3.15 |
+| T_TOCA_yell      | 3.02 | 5.34 |  2.71 |  2.75 | 3.84 |
+| T_TOCA_stub      | 3.06 | 2.48 |  2.50 |  1.92 | 2.02 |
+| T_TOCA_teas      | 2.44 | 2.14 |  3.01 |  2.76 | 2.74 |
 
 </div>
 
 </div>
 
 ``` r
-knitr::kable(lambda, digits = 2)
+knitr::kable(t(nu), digits = 2)
 ```
 
 <div id="tbl-nu">
@@ -386,13 +390,17 @@ Table 2: Configural Intercepts
 
 <div class="cell-output-display">
 
-|  | T_TOCA_breakrule | T_TOCA_harmpro | T_TOCA_breakthg | T_TOCA_takeprop | T_TOCA_fight | T_TOCA_lies | T_TOCA_yell | T_TOCA_stub | T_TOCA_teas |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| FAST | 3.82 | NA | 2.86 | 3.12 | 2.22 | 2.65 | 3.02 | 3.06 | 2.44 |
-| LIFT | 2.57 | 5.28 | 3.15 | 2.81 | 4.08 | 2.68 | 5.34 | 2.48 | 2.14 |
-| PIRC1 | 3.27 | 1.91 | 3.77 | 3.86 | 2.86 | 3.20 | 2.71 | 2.50 | 3.01 |
-| PIRC2 | 2.65 | 4.27 | 4.69 | 4.19 | 4.28 | 3.56 | 2.75 | 1.92 | 2.76 |
-| SAFE | 2.94 | 4.88 | 4.34 | 6.19 | 3.51 | 3.15 | 3.84 | 2.02 | 2.74 |
+|                  | FAST |  LIFT | PIRC1 | PIRC2 |  SAFE |
+|:-----------------|-----:|------:|------:|------:|------:|
+| T_TOCA_breakrule | 5.28 |  0.19 |  1.06 |  0.16 |  1.71 |
+| T_TOCA_harmpro   |   NA | -5.15 | -0.85 | -3.83 | -2.08 |
+| T_TOCA_breakthg  | 0.33 | -3.36 | -2.01 | -5.15 | -1.85 |
+| T_TOCA_takeprop  | 1.53 | -2.54 | -0.93 | -3.37 | -0.71 |
+| T_TOCA_fight     | 2.53 | -1.41 | -1.22 | -2.51 | -0.34 |
+| T_TOCA_lies      | 2.01 | -2.10 | -0.60 | -2.83 |  0.58 |
+| T_TOCA_yell      | 3.13 | -1.86 | -0.11 | -1.38 | -0.18 |
+| T_TOCA_stub      | 4.08 |  1.99 |  0.91 | -1.08 |  0.27 |
+| T_TOCA_teas      | 2.75 |  0.51 |  0.34 | -0.98 |  0.12 |
 
 </div>
 
@@ -412,7 +420,7 @@ aligned <- sirt::invariance.alignment(
 ```
 
 ``` r
-knitr::kable(aligned$lambda.aligned, digits = 2)
+knitr::kable(t(aligned$lambda.aligned), digits = 2)
 ```
 
 <div id="tbl-alambda">
@@ -421,20 +429,24 @@ Table 3: Aligned Loadings
 
 <div class="cell-output-display">
 
-|  | T_TOCA_breakrule | T_TOCA_harmpro | T_TOCA_breakthg | T_TOCA_takeprop | T_TOCA_fight | T_TOCA_lies | T_TOCA_yell | T_TOCA_stub | T_TOCA_teas |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| FAST | 3.82 | NA | 2.86 | 3.12 | 2.22 | 2.65 | 3.02 | 3.06 | 2.44 |
-| LIFT | 1.55 | 3.18 | 1.90 | 1.70 | 2.47 | 1.62 | 3.22 | 1.50 | 1.29 |
-| PIRC1 | 2.64 | 1.55 | 3.04 | 3.12 | 2.31 | 2.59 | 2.19 | 2.02 | 2.43 |
-| PIRC2 | 1.97 | 3.18 | 3.49 | 3.12 | 3.19 | 2.65 | 2.05 | 1.43 | 2.06 |
-| SAFE | 1.93 | 3.20 | 2.85 | 4.07 | 2.31 | 2.07 | 2.52 | 1.33 | 1.80 |
+|                  | FAST | LIFT | PIRC1 | PIRC2 | SAFE |
+|:-----------------|-----:|-----:|------:|------:|-----:|
+| T_TOCA_breakrule | 3.82 | 1.55 |  2.64 |  1.97 | 1.93 |
+| T_TOCA_harmpro   |   NA | 3.18 |  1.55 |  3.18 | 3.20 |
+| T_TOCA_breakthg  | 2.86 | 1.90 |  3.04 |  3.49 | 2.85 |
+| T_TOCA_takeprop  | 3.12 | 1.70 |  3.12 |  3.12 | 4.07 |
+| T_TOCA_fight     | 2.22 | 2.47 |  2.31 |  3.19 | 2.31 |
+| T_TOCA_lies      | 2.65 | 1.62 |  2.59 |  2.65 | 2.07 |
+| T_TOCA_yell      | 3.02 | 3.22 |  2.19 |  2.05 | 2.52 |
+| T_TOCA_stub      | 3.06 | 1.50 |  2.02 |  1.43 | 1.33 |
+| T_TOCA_teas      | 2.44 | 1.29 |  2.43 |  2.06 | 1.80 |
 
 </div>
 
 </div>
 
 ``` r
-knitr::kable(aligned$nu.aligned, digits = 2)
+knitr::kable(t(aligned$nu.aligned), digits = 2)
 ```
 
 <div id="tbl-anu">
@@ -443,20 +455,24 @@ Table 4: Aligned Intercepts
 
 <div class="cell-output-display">
 
-|  | T_TOCA_breakrule | T_TOCA_harmpro | T_TOCA_breakthg | T_TOCA_takeprop | T_TOCA_fight | T_TOCA_lies | T_TOCA_yell | T_TOCA_stub | T_TOCA_teas |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| FAST | 5.28 | NA | 0.33 | 1.53 | 2.53 | 2.01 | 3.13 | 4.08 | 2.75 |
-| LIFT | 2.87 | 0.37 | -0.06 | 0.40 | 2.86 | 0.71 | 3.72 | 4.59 | 2.75 |
-| PIRC1 | 3.15 | 0.37 | 0.39 | 1.53 | 0.61 | 1.45 | 1.62 | 2.50 | 2.26 |
-| PIRC2 | 3.26 | 1.17 | 0.35 | 1.53 | 2.50 | 1.34 | 1.84 | 1.17 | 2.26 |
-| SAFE | 3.18 | 0.37 | 0.33 | 2.41 | 1.43 | 2.16 | 1.74 | 1.29 | 1.50 |
+|                  | FAST |  LIFT | PIRC1 | PIRC2 | SAFE |
+|:-----------------|-----:|------:|------:|------:|-----:|
+| T_TOCA_breakrule | 5.28 |  2.87 |  3.15 |  3.26 | 3.18 |
+| T_TOCA_harmpro   |   NA |  0.37 |  0.37 |  1.17 | 0.37 |
+| T_TOCA_breakthg  | 0.33 | -0.06 |  0.39 |  0.35 | 0.33 |
+| T_TOCA_takeprop  | 1.53 |  0.40 |  1.53 |  1.53 | 2.41 |
+| T_TOCA_fight     | 2.53 |  2.86 |  0.61 |  2.50 | 1.43 |
+| T_TOCA_lies      | 2.01 |  0.71 |  1.45 |  1.34 | 2.16 |
+| T_TOCA_yell      | 3.13 |  3.72 |  1.62 |  1.84 | 1.74 |
+| T_TOCA_stub      | 4.08 |  4.59 |  2.50 |  1.17 | 1.29 |
+| T_TOCA_teas      | 2.75 |  2.75 |  2.26 |  2.26 | 1.50 |
 
 </div>
 
 </div>
 
 ``` r
-knitr::kable(aligned$pars, digits = 2)
+knitr::kable(t(aligned$pars), digits = 2)
 ```
 
 <div id="tbl-apars">
@@ -465,13 +481,10 @@ Table 5: Aligned Latent means and variances
 
 <div class="cell-output-display">
 
-|       | alpha0 | psi0 |
-|:------|-------:|-----:|
-| FAST  |   0.00 | 1.00 |
-| LIFT  |  -1.73 | 1.66 |
-| PIRC1 |  -0.79 | 1.24 |
-| PIRC2 |  -1.57 | 1.34 |
-| SAFE  |  -0.77 | 1.52 |
+|        | FAST |  LIFT | PIRC1 | PIRC2 |  SAFE |
+|:-------|-----:|------:|------:|------:|------:|
+| alpha0 |    0 | -1.73 | -0.79 | -1.57 | -0.77 |
+| psi0   |    1 |  1.66 |  1.24 |  1.34 |  1.52 |
 
 </div>
 
@@ -518,12 +531,20 @@ f2 <- pinsearch::fmacs_ordered(
 )
 # Combine to form one effect size vector
 f_effsize <- cbind(f1[1, 1, drop = FALSE], f2, f1[1, -1, drop = FALSE])
-knitr::kable(f_effsize, digits = 2)
+knitr::kable(t(f_effsize), digits = 2)
 ```
 
-|  | T_TOCA_breakrule | T_TOCA_harmpro | T_TOCA_breakthg | T_TOCA_takeprop | T_TOCA_fight | T_TOCA_lies | T_TOCA_yell | T_TOCA_stub | T_TOCA_teas |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| fmacs | 0.11 | 0.14 | 0.09 | 0.14 | 0.25 | 0.16 | 0.14 | 0.29 | 0.18 |
+|                  | fmacs |
+|:-----------------|------:|
+| T_TOCA_breakrule |  0.11 |
+| T_TOCA_harmpro   |  0.14 |
+| T_TOCA_breakthg  |  0.09 |
+| T_TOCA_takeprop  |  0.14 |
+| T_TOCA_fight     |  0.25 |
+| T_TOCA_lies      |  0.16 |
+| T_TOCA_yell      |  0.14 |
+| T_TOCA_stub      |  0.29 |
+| T_TOCA_teas      |  0.18 |
 
 The magnitude of noninvariance effect size is not trivial (with fmacs \>
 .1) for most items.
@@ -888,6 +909,11 @@ for (g in seq_along(groups)) {
     Iteration: 78, Log-Lik: -621.381, Max-Change: 0.00010
     Iteration: 79, Log-Lik: -621.381, Max-Change: 0.00010
 
+``` r
+# Save factor scores
+saveRDS(fsg, file = "fsg.RDS")
+```
+
 ### Reliability
 
 ``` r
@@ -925,7 +951,7 @@ ggplot(fsg, aes(x = f)) +
 
     Warning: Removed 386 rows containing non-finite values (`stat_bin()`).
 
-![](example_kush_etal_alignment_files/figure-commonmark/unnamed-chunk-13-1.png)
+![](example_kush_etal_alignment_files/figure-commonmark/unnamed-chunk-14-1.png)
 
 ### Factor score regression (no reliability adjustment)
 
@@ -1146,44 +1172,45 @@ probitreg_umx <- umxRAM("
 
     ?umxSummary options: std=T|F', digits=, report= 'html', filter= 'NS' & more
 
-    [1] "Warning calling mxRefModels: mxRefModels can't handle all designs, including twin, and WLS https://github.com/OpenMx/OpenMx/issues/184"
+\[1\] “Warning calling mxRefModels: mxRefModels can’t handle all
+designs, including twin, and WLS
+https://github.com/OpenMx/OpenMx/issues/184”
 
+|     | name                             | Estimate | SE    | type          |
+|:----|:---------------------------------|---------:|:------|:--------------|
+| 7   | f_with_study_idLIFT              |   -0.098 | 0.009 | Manifest Cov  |
+| 8   | f_with_study_idPIRC1             |    0.032 | 0.011 | Manifest Cov  |
+| 9   | f_with_study_idPIRC2             |   -0.116 | 0.008 | Manifest Cov  |
+| 10  | f_with_study_idSAFE              |    0.004 | 0.004 | Manifest Cov  |
+| 13  | study_idLIFT_with_study_idPIRC1  |   -0.055 | 0.003 | Manifest Cov  |
+| 14  | study_idLIFT_with_study_idPIRC2  |   -0.018 | 0.002 | Manifest Cov  |
+| 15  | study_idLIFT_with_study_idSAFE   |   -0.005 | 0.001 | Manifest Cov  |
+| 17  | study_idPIRC1_with_study_idPIRC2 |   -0.077 | 0.003 | Manifest Cov  |
+| 18  | study_idPIRC1_with_study_idSAFE  |   -0.019 | 0.002 | Manifest Cov  |
+| 20  | study_idPIRC2_with_study_idSAFE  |   -0.006 | 0.001 | Manifest Cov  |
+| 1   | f_to_hs2                         |   -0.152 | 0.022 | Manifest path |
+| 2   | study_idLIFT_to_hs2              |    0.312 | 0.096 | Manifest path |
+| 3   | study_idPIRC1_to_hs2             |    0.124 | 0.064 | Manifest path |
+| 4   | study_idPIRC2_to_hs2             |    0.597 | 0.088 | Manifest path |
+| 5   | study_idSAFE_to_hs2              |   -1.591 | 0.115 | Manifest path |
+| 22  | one_to_f                         |   -0.853 | 0.021 | Mean          |
+| 23  | one_to_study_idLIFT              |    0.114 | 0.005 | Mean          |
+| 24  | one_to_study_idPIRC1             |    0.477 | 0.008 | Mean          |
+| 25  | one_to_study_idPIRC2             |    0.161 | 0.006 | Mean          |
+| 26  | one_to_study_idSAFE              |    0.041 | 0.003 | Mean          |
+| 6   | f_with_f                         |    1.575 | 0.038 | Residual      |
+| 11  | hs2_with_hs2                     |    1.000 | 0     | Residual      |
+| 12  | study_idLIFT_with_study_idLIFT   |    0.101 | 0.002 | Residual      |
+| 16  | study_idPIRC1_with_study_idPIRC1 |    0.249 | 0.006 | Residual      |
+| 19  | study_idPIRC2_with_study_idPIRC2 |    0.136 | 0.003 | Residual      |
+| 21  | study_idSAFE_with_study_idSAFE   |    0.038 | 0.001 | Residual      |
 
-    Table: Parameter loadings for model 'm1'
-
-    |   |name                             | Estimate|SE    |type          |
-    |:--|:--------------------------------|--------:|:-----|:-------------|
-    |7  |f_with_study_idLIFT              |   -0.098|0.009 |Manifest Cov  |
-    |8  |f_with_study_idPIRC1             |    0.032|0.011 |Manifest Cov  |
-    |9  |f_with_study_idPIRC2             |   -0.116|0.008 |Manifest Cov  |
-    |10 |f_with_study_idSAFE              |    0.004|0.004 |Manifest Cov  |
-    |13 |study_idLIFT_with_study_idPIRC1  |   -0.055|0.003 |Manifest Cov  |
-    |14 |study_idLIFT_with_study_idPIRC2  |   -0.018|0.002 |Manifest Cov  |
-    |15 |study_idLIFT_with_study_idSAFE   |   -0.005|0.001 |Manifest Cov  |
-    |17 |study_idPIRC1_with_study_idPIRC2 |   -0.077|0.003 |Manifest Cov  |
-    |18 |study_idPIRC1_with_study_idSAFE  |   -0.019|0.002 |Manifest Cov  |
-    |20 |study_idPIRC2_with_study_idSAFE  |   -0.006|0.001 |Manifest Cov  |
-    |1  |f_to_hs2                         |   -0.152|0.022 |Manifest path |
-    |2  |study_idLIFT_to_hs2              |    0.312|0.096 |Manifest path |
-    |3  |study_idPIRC1_to_hs2             |    0.124|0.064 |Manifest path |
-    |4  |study_idPIRC2_to_hs2             |    0.597|0.088 |Manifest path |
-    |5  |study_idSAFE_to_hs2              |   -1.591|0.115 |Manifest path |
-    |22 |one_to_f                         |   -0.853|0.021 |Mean          |
-    |23 |one_to_study_idLIFT              |    0.114|0.005 |Mean          |
-    |24 |one_to_study_idPIRC1             |    0.477|0.008 |Mean          |
-    |25 |one_to_study_idPIRC2             |    0.161|0.006 |Mean          |
-    |26 |one_to_study_idSAFE              |    0.041|0.003 |Mean          |
-    |6  |f_with_f                         |    1.575|0.038 |Residual      |
-    |11 |hs2_with_hs2                     |    1.000|0     |Residual      |
-    |12 |study_idLIFT_with_study_idLIFT   |    0.101|0.002 |Residual      |
-    |16 |study_idPIRC1_with_study_idPIRC1 |    0.249|0.006 |Residual      |
-    |19 |study_idPIRC2_with_study_idPIRC2 |    0.136|0.003 |Residual      |
-    |21 |study_idSAFE_with_study_idSAFE   |    0.038|0.001 |Residual      |
+Parameter loadings for model ‘m1’
 
 
     Model Fit: χ²(1) = NA, p = NA; CFI = NA; TLI = NA; RMSEA = NA
 
-    Algebra'threshMat' = -0.589CI95[-0.686, -0.492]. p-value < 0.001
+Algebra’threshMat’ = -0.589CI95\[-0.686, -0.492\]. p-value \< 0.001
 
 ``` r
 # plot(probitreg_umx)  # path diagram
@@ -1195,8 +1222,8 @@ Adjusting for measurement error
 
 ``` r
 # Define loading and error variances
-# Loading = Latent variance - SE^2
-data$rel_f <- data$sd_eta^2 - data$SE_f^2
+# Loading = 1 - SE^2 / latent variance
+data$rel_f <- 1 - data$SE_f^2 / data$sd_eta^2
 # Error variance = SE^2 * reliability
 data$ev_f <- data$SE_f^2 * data$rel_f
 # Drop rows with missing rel_f
@@ -1248,7 +1275,7 @@ probitreg_2spa <- umxRAM(
     Running 2spa with 26 parameters
 
 
-     Lowest minimum so far:  19797.1146080977
+     Lowest minimum so far:  20052.8055054881
 
 
     Beginning fit attempt 1 of at maximum 10 extra tries
@@ -1296,6 +1323,9 @@ probitreg_2spa <- umxRAM(
     Running 2spa with 26 parameters
 
 
+     Fit attempt generated errors
+
+
     Beginning fit attempt 7 of at maximum 10 extra tries
 
     Running 2spa with 26 parameters
@@ -1338,59 +1368,59 @@ probitreg_2spa <- umxRAM(
     Running 2spa with 26 parameters
 
 
-     Solution found!  Final fit=19797.115 (started at 24817.453)  (11 attempt(s): 2 valid, 9 errors)
+     Solution found!  Final fit=20052.806 (started at 27663.785)  (11 attempt(s): 1 valid, 10 errors)
 
      Start values from best fit:
 
-    0.317772855014699,0.0548478806718147,0.617035932770471,-1.77661291688953,-0.260547315991825,0.05299558058028,-0.0279008005753229,0.249990295018889,-0.0100725991438871,-0.0891426316916459,0.147211477012138,-0.00245904972765901,-0.0217625556823283,-0.0078566391973372,0.0418775724980522,-0.00817844145262191,-0.0231120388482403,-0.0838689414261576,0.00839728732108537,0.682059316825105,0.056148269978801,0.496911854750536,0.179393706596932,0.0437955767713424,-0.563416587242982,-0.593860669222389
+    0.200684426983861,0.0441311908600139,0.575825376892984,-1.84038715394607,-0.145034829804772,0.0529957635770528,-0.0279008000300894,0.249990593695406,-0.0100727266702378,-0.0891429069082674,0.147211723328222,-0.00245905445138492,-0.0217625071252046,-0.00785679134164797,0.0418776282735316,-0.0555994488409809,-0.00205583447242914,-0.18018548527998,0.00376635198248906,2.2730831864825,0.0561481636160452,0.496911911360759,0.179393675078171,0.0437955135402106,-0.970162315671518,-0.621613908502643
 
     ?umxSummary options: std=T|F', digits=, report= 'html', filter= 'NS' & more
 
-    [1] "Warning calling mxRefModels: mxRefModels can't handle all designs, including twin, and WLS https://github.com/OpenMx/OpenMx/issues/184"
+\[1\] “Warning calling mxRefModels: mxRefModels can’t handle all
+designs, including twin, and WLS
+https://github.com/OpenMx/OpenMx/issues/184”
 
     Warning in mxStandardizeRAMpaths(model, SE = SE): 'model' (or one of its
     submodels) contains definition variables; interpret results of
     mxStandardizeRAMpaths() cautiously
 
+|     | name                             | Estimate | SE    | type                |
+|:----|:---------------------------------|---------:|:------|:--------------------|
+| 5   | data.rel_f                       |    0.782 | 0     | Factor loading      |
+| 6   | eta_to_hs2                       |   -0.145 | 0.022 | Factor loading      |
+| 23  | eta_with_eta                     |    2.273 | 0.072 | Factor Variance     |
+| 13  | eta_with_study_idLIFT            |   -0.056 | 0.006 | Latent-Manifest Cov |
+| 17  | eta_with_study_idPIRC1           |   -0.002 | 0.014 | Latent-Manifest Cov |
+| 20  | eta_with_study_idPIRC2           |   -0.180 | 0.011 | Latent-Manifest Cov |
+| 22  | eta_with_study_idSAFE            |    0.004 | 0.006 | Latent-Manifest Cov |
+| 10  | study_idLIFT_with_study_idPIRC1  |   -0.028 | 0.002 | Manifest Cov        |
+| 11  | study_idLIFT_with_study_idPIRC2  |   -0.010 | 0.001 | Manifest Cov        |
+| 12  | study_idLIFT_with_study_idSAFE   |   -0.002 | 0.001 | Manifest Cov        |
+| 15  | study_idPIRC1_with_study_idPIRC2 |   -0.089 | 0.004 | Manifest Cov        |
+| 16  | study_idPIRC1_with_study_idSAFE  |   -0.022 | 0.002 | Manifest Cov        |
+| 19  | study_idPIRC2_with_study_idSAFE  |   -0.008 | 0.001 | Manifest Cov        |
+| 1   | study_idLIFT_to_hs2              |    0.201 | 0.128 | Manifest path       |
+| 2   | study_idPIRC1_to_hs2             |    0.044 | 0.062 | Manifest path       |
+| 3   | study_idPIRC2_to_hs2             |    0.576 | 0.097 | Manifest path       |
+| 4   | study_idSAFE_to_hs2              |   -1.840 | 0.137 | Manifest path       |
+| 24  | one_to_study_idLIFT              |    0.056 | 0.004 | Mean                |
+| 25  | one_to_study_idPIRC1             |    0.497 | 0.008 | Mean                |
+| 26  | one_to_study_idPIRC2             |    0.179 | 0.006 | Mean                |
+| 27  | one_to_study_idSAFE              |    0.044 | 0.003 | Mean                |
+| 28  | one_to_eta                       |   -0.970 | 0.027 | Mean                |
+| 7   | data.ev_f                        |    0.170 | 0     | Residual            |
+| 8   | hs2_with_hs2                     |    1.000 | 0     | Residual            |
+| 9   | study_idLIFT_with_study_idLIFT   |    0.053 | 0.001 | Residual            |
+| 14  | study_idPIRC1_with_study_idPIRC1 |    0.250 | 0.006 | Residual            |
+| 18  | study_idPIRC2_with_study_idPIRC2 |    0.147 | 0.003 | Residual            |
+| 21  | study_idSAFE_with_study_idSAFE   |    0.042 | 0.001 | Residual            |
 
-
-    Table: Parameter loadings for model '2spa'
-
-    |   |name                             | Estimate|SE    |type                |
-    |:--|:--------------------------------|--------:|:-----|:-------------------|
-    |5  |data.rel_f                       |    0.782|0     |Factor loading      |
-    |6  |eta_to_hs2                       |   -0.261|0.04  |Factor loading      |
-    |23 |eta_with_eta                     |    0.682|0.027 |Factor Variance     |
-    |13 |eta_with_study_idLIFT            |   -0.008|0.004 |Latent-Manifest Cov |
-    |17 |eta_with_study_idPIRC1           |   -0.023|0.008 |Latent-Manifest Cov |
-    |20 |eta_with_study_idPIRC2           |   -0.084|0.006 |Latent-Manifest Cov |
-    |22 |eta_with_study_idSAFE            |    0.008|0.003 |Latent-Manifest Cov |
-    |10 |study_idLIFT_with_study_idPIRC1  |   -0.028|0.002 |Manifest Cov        |
-    |11 |study_idLIFT_with_study_idPIRC2  |   -0.010|0.001 |Manifest Cov        |
-    |12 |study_idLIFT_with_study_idSAFE   |   -0.002|0.001 |Manifest Cov        |
-    |15 |study_idPIRC1_with_study_idPIRC2 |   -0.089|0.004 |Manifest Cov        |
-    |16 |study_idPIRC1_with_study_idSAFE  |   -0.022|0.002 |Manifest Cov        |
-    |19 |study_idPIRC2_with_study_idSAFE  |   -0.008|0.001 |Manifest Cov        |
-    |1  |study_idLIFT_to_hs2              |    0.318|0.124 |Manifest path       |
-    |2  |study_idPIRC1_to_hs2             |    0.055|0.062 |Manifest path       |
-    |3  |study_idPIRC2_to_hs2             |    0.617|0.095 |Manifest path       |
-    |4  |study_idSAFE_to_hs2              |   -1.777|0.135 |Manifest path       |
-    |24 |one_to_study_idLIFT              |    0.056|0.004 |Mean                |
-    |25 |one_to_study_idPIRC1             |    0.497|0.008 |Mean                |
-    |26 |one_to_study_idPIRC2             |    0.179|0.006 |Mean                |
-    |27 |one_to_study_idSAFE              |    0.044|0.003 |Mean                |
-    |28 |one_to_eta                       |   -0.563|0.016 |Mean                |
-    |7  |data.ev_f                        |    0.170|0     |Residual            |
-    |8  |hs2_with_hs2                     |    1.000|0     |Residual            |
-    |9  |study_idLIFT_with_study_idLIFT   |    0.053|0.001 |Residual            |
-    |14 |study_idPIRC1_with_study_idPIRC1 |    0.250|0.006 |Residual            |
-    |18 |study_idPIRC2_with_study_idPIRC2 |    0.147|0.003 |Residual            |
-    |21 |study_idSAFE_with_study_idSAFE   |    0.042|0.001 |Residual            |
+Parameter loadings for model ‘2spa’
 
 
     Model Fit: χ²(1) = NA, p = NA; CFI = NA; TLI = NA; RMSEA = NA
 
-    Algebra'threshMat' = -0.594CI95[-0.688, -0.499]. p-value < 0.001
+Algebra’threshMat’ = -0.622CI95\[-0.716, -0.528\]. p-value \< 0.001
 
 ## Sensitivity Analysis
 
@@ -1402,7 +1432,7 @@ data$toca_mean <- rowMeans(data[item_names], na.rm = TRUE)
 plot(x = data$toca_mean, y = fsg[, 1], xlab = "Mean scores", ylab = "EAP scores")
 ```
 
-![](example_kush_etal_alignment_files/figure-commonmark/unnamed-chunk-17-1.png)
+![](example_kush_etal_alignment_files/figure-commonmark/unnamed-chunk-18-1.png)
 
 ``` r
 cor(data$toca_mean, fsg[, 1], use = "complete")

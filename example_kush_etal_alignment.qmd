@@ -69,13 +69,13 @@ for (g in seq_along(groups)) {
 ```{r}
 #| label: tbl-lambda
 #| tbl-cap: Configural Loadings
-knitr::kable(lambda, digits = 2)
+knitr::kable(t(lambda), digits = 2)
 ```
 
 ```{r}
 #| label: tbl-nu
 #| tbl-cap: Configural Intercepts
-knitr::kable(lambda, digits = 2)
+knitr::kable(t(nu), digits = 2)
 ```
 
 ## Alignment Optimization
@@ -94,19 +94,19 @@ aligned <- sirt::invariance.alignment(
 ```{r}
 #| label: tbl-alambda
 #| tbl-cap: Aligned Loadings
-knitr::kable(aligned$lambda.aligned, digits = 2)
+knitr::kable(t(aligned$lambda.aligned), digits = 2)
 ```
 
 ```{r}
 #| label: tbl-anu
 #| tbl-cap: Aligned Intercepts
-knitr::kable(aligned$nu.aligned, digits = 2)
+knitr::kable(t(aligned$nu.aligned), digits = 2)
 ```
 
 ```{r}
 #| label: tbl-apars
 #| tbl-cap: Aligned Latent means and variances
-knitr::kable(aligned$pars, digits = 2)
+knitr::kable(t(aligned$pars), digits = 2)
 ```
 
 ### Quality: Effect size of noninvariance
@@ -150,7 +150,7 @@ f2 <- pinsearch::fmacs_ordered(
 )
 # Combine to form one effect size vector
 f_effsize <- cbind(f1[1, 1, drop = FALSE], f2, f1[1, -1, drop = FALSE])
-knitr::kable(f_effsize, digits = 2)
+knitr::kable(t(f_effsize), digits = 2)
 ```
 
 The magnitude of noninvariance effect size is not trivial (with fmacs > .1) for most items.
@@ -192,6 +192,12 @@ for (g in seq_along(groups)) {
         )
     )
 }
+```
+
+```{r}
+#| eval: false
+# Save factor scores
+saveRDS(fsg, file = "fsg.RDS")
 ```
 
 ### Reliability
@@ -238,6 +244,7 @@ summary(m_main)
 Using `umx` (without unreliability adjustment)
 
 ```{r}
+#| results: asis
 # Recode discrete variable to be used with OpenMx
 data$hs2 <- mxFactor(data$hs, levels = c(0, 1))
 # Create dummy variables for Study ID
@@ -260,9 +267,10 @@ probitreg_umx <- umxRAM("
 Adjusting for measurement error
 
 ```{r}
+#| results: asis
 # Define loading and error variances
-# Loading = Latent variance - SE^2
-data$rel_f <- data$sd_eta^2 - data$SE_f^2
+# Loading = 1 - SE^2 / latent variance
+data$rel_f <- 1 - data$SE_f^2 / data$sd_eta^2
 # Error variance = SE^2 * reliability
 data$ev_f <- data$SE_f^2 * data$rel_f
 # Drop rows with missing rel_f
