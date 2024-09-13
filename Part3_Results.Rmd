@@ -1,0 +1,365 @@
+---
+title: "Part3_Results"
+author: "Meltem Ozcan"
+date: "2024-09-12"
+output: pdf_document
+---
+
+This file assumes that the code in `Part1_Harmonization_continuous.Rmd` and `Part2_Harmonization_ordinal.Rmd` have been run. These two files result in the rds files that will be read in within the current file. If those files have not been run yet, please run the files to prepare the relevant rds files. 
+
+# Install and load packages, prepare data.
+
+```{r echo = TRUE, warning=FALSE, message = FALSE}
+library(dplyr)
+library(lavaan)
+library(sirt)
+library(mirt)
+library(kableExtra)
+library(here)
+library(ggplot2)
+# also install packages: haven, numDeriv
+```
+
+```{r echo = TRUE, message = FALSE, warning = FALSE}
+dat <- readRDS("rds/dat.rds")
+
+est_partial <- readRDS("rds/est_partial.rds")
+est_align <- readRDS("rds/est_align.rds")
+est_partial_ord <- readRDS("rds/est_partial_ord.rds")
+est_align_ord <- readRDS("rds/est_align_ord.rds")
+est_align_ord_th <- readRDS("rds/est_align_ord_th.rds")
+est_align_ord_lam <- readRDS("rds/est_align_ord_lam.rds")
+fit_partial <- readRDS("rds/fit_partial.rds")
+fit_align <- readRDS("rds/fit_align.rds")
+mod_aligned <- readRDS("rds/mod_aligned.rds")
+
+score_df_cont <- readRDS("rds/score_df_continuous.rds")
+score_df_ord <- readRDS("rds/score_df_ord.rds")
+df <- cbind(score_df_cont, score_df_ord[,c("approx_ord", "approx_ord_SE", "approx_ord_rel", "approx_ord_ev")])
+head(df, 2)
+saveRDS(df, "rds/df.rds")
+m_items <- paste0("i", 1:5) 
+```
+
+Also source the following R file to repeat the analyses up to this point on the dataset without any NAs for later sensitivity analyses.
+
+```{r}
+if (!file.exists("rds/score_df_noNAs.rds")) {
+  source("code/repeatAnalysesNoNAs.R")
+} else {
+  score_df_noNAs <- readRDS("rds/score_df_noNAs.rds")
+}
+```
+
+
+
+```{r echo=FALSE}
+models <- rbind("N = 30,749" = c("M_B1", "M1", "M2", "-", "M3"), 
+                "N = 29,202" = c("M_B2", "M4", "M5", "M6", "M7"))
+colnames(models) <- c("Mean Score", rep(c("Partial", "Approximate"), 2))
+
+kbl(models, booktabs = T, align = "c", table.attr = "style='width:60%;'",
+    caption = "Models by approach and dataset", longtable = TRUE) %>%
+  kable_classic() %>% 
+  add_header_above(c(" " = 2, "Continuous" = 2, "Ordinal" = 2))
+```
+```{r echo = TRUE}
+source('code/table_helper_functions.R')
+```
+
+```{r echo = FALSE}
+build_loadings_tab()
+```
+
+```{r echo = FALSE}
+build_intercepts_tab()
+```
+
+\newpage
+
+```{r echo = FALSE}
+build_thresholds_tab()
+```
+
+```{r echo = FALSE}
+build_latent_tab()
+```
+
+## Score distributions
+
+```{r echo = FALSE}
+build_mn_sd_tab(df, score_df_noNAs)
+```
+
+## Score correlations
+
+```{r}
+# compute matrix of correlations
+cor_30749 <- cor(df[, c("mean_score", "partial_cont", "approx_cont", "approx_ord")], use = "complete.obs")
+```
+
+```{r echo=FALSE}
+cor_30749 <- round(cor_30749, 3)
+cor_30749_add_row <- rbind(cor_30749[1:3,], rep("-",4), cor_30749[4,])
+cor_30749_add_col <- cbind(cor_30749_add_row[,1:3], rep("-",5), cor_30749_add_row[,4])
+colnames(cor_30749_add_col) <- rownames(cor_30749_add_col) <- as.character(models[1,])
+
+cor_30749_add_col %>% 
+  kbl(booktabs = T, align = "c", table.attr = "style='width:80%;'",
+      caption = "Correlation of FS (N = 30,740)") %>%
+  add_header_above(c(" ", "Mean scores" = 1,  "Partial" = 1, "Approximate" = 1,
+                     "Partial" = 1, "Approximate" = 1)) %>%
+  add_header_above(c(" ", " " = 1,  "Continuous" = 2, "Ordinal" = 2)) %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(0, bold = TRUE)
+
+# repeat for the dataset without NAs
+cor_29202 <- cor(as.matrix(apply(score_df_noNAs[, c("mean_score",
+                                                  "partial_cont", 
+                                                  "approx_cont",
+                                                  "partial_ord",
+                                                  "approx_ord")], 
+                                 as.numeric, MARGIN = 2)))
+colnames(cor_29202) <- rownames(cor_29202) <- as.character(models[2,])
+
+# to match the apperance of the previous table
+cor_29202_mat <- cor_29202 %>% round(3) %>% apply(MARGIN = 2, as.character) %>%
+  as.data.frame()
+rownames(cor_29202_mat) <- colnames(cor_29202_mat)
+cor_29202_mat %>%
+  kbl(booktabs = T, align = "c", table.attr = "style='width:80%;'",
+      caption = "Correlation of FS on dataset with no NAs (N = 29,202)") %>%
+  add_header_above(c(" ", "Mean scores" = 1,  "Partial" = 1, "Approximate" = 1,
+                     "Partial" = 1, "Approximate" = 1)) %>%
+  add_header_above(c(" ", " " = 1,  "Continuous" = 2, "Ordinal" = 2)) %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(0, bold = TRUE)
+```
+
+```{r echo = FALSE, warning=FALSE, message = FALSE}
+source('code/scatterplots.R')
+```
+
+
+## Reliability
+
+```{r}
+mnsd(df$partial_rel)
+mnsd(df$approx_rel)
+mnsd(df$approx_ord_rel)
+```
+
+```{r echo = FALSE}
+tab_rel <- round(
+  cbind(mnsd(df[df$sample=="ELS",]$partial_rel),
+       mnsd(df[df$sample=="HSLS",]$partial_rel),
+       mnsd(df[df$sample=="ELS",]$approx_rel),
+       mnsd(df[df$sample=="HSLS",]$approx_rel),
+       mnsd(df[df$sample=="ELS",]$approx_ord_rel),
+       mnsd(df[df$sample=="HSLS",]$approx_ord_rel)), 4)
+tab_rel <- cbind(tab_rel[,1:4], rep("-", 2), rep("-", 2), tab_rel[,5:6])
+
+rownames(tab_rel) <- c("Mean", "SD")
+kbl(tab_rel, booktabs = T, align = "c", table.attr = "style='width:70%;'",
+      caption = "Mean and SD of FS Reliabilities (N = 30,740)") %>%
+  add_header_above(c(" ", rep(c("ELS", "HSLS"), 4))) %>% 
+  add_header_above(c(" "= 1, "Partial" = 2, "Approximate" = 2, "Partial" = 2,
+                     "Approximate" = 2)) %>% 
+  add_header_above(c(" "= 1, "Continuous" = 4, "Ordinal" = 4))
+```
+
+```{r echo = FALSE}
+par(las=2)
+hist(df$partial_rel, col = "lightblue", 
+     main = "Reliability of Bartlett factor scores (partial inv.; cont.)", 
+     xlab = "Reliability", cex = 0.7,  cex.axis = 0.7, ylim = c(0,30000))
+hist(df$approx_rel, col = "lightblue3", 
+     main = "Reliability of Bartlett factor scores (approx. inv,; cont.)", 
+     xlab = "Reliability", cex = 0.7,  cex.axis = 0.7, ylim = c(0,30000))
+hist(df$approx_ord_rel, col = "lightblue4",
+     main = "Reliability of EAP factor scores (approx. inv.; ordinal)", 
+     xlab = "Reliability", cex = 0.7,  cex.axis = 0.7, ylim = c(0,30000))
+```
+
+```{r}
+rel_30749 <- cor(as.matrix(apply(df[ ,c("partial_rel",
+                                               "approx_rel", 
+                                               "approx_ord_rel")], 
+                                 as.numeric, MARGIN = 2)),
+                 use = "complete.obs")
+rel_30749 <- round(rel_30749, 4)
+rel_30749_add_row <- rbind(rel_30749[1:2,], rep("-",3) , rel_30749[3,])
+rel_30749_add_col <- cbind(rel_30749_add_row[,1:2], rep("-",4) , rel_30749_add_row[,3])
+colnames(rel_30749_add_col) <- rownames(rel_30749_add_col) <- as.character(models[1,])[2:5]
+```
+
+```{r echo = FALSE}
+rel_30749_add_col %>% 
+  kbl(booktabs = T, align = "c", table.attr = "style='width:80%;'",
+      caption = "Correlation of FS Reliabilities (N = 30,740)") %>%
+  add_header_above(c(" ",  "Partial" = 1, "Approximate" = 1,
+                     "Partial" = 1, "Approximate" = 1)) %>%
+  add_header_above(c( " " = 1,  "Continuous" = 2, "Ordinal" = 2)) %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(0, bold = TRUE)
+```
+
+```{r echo = FALSE, message=FALSE, warning = FALSE}
+# run source('code/scatterplots.R') first if not already run 
+scatter_p(df, df$partial_rel, df$approx_rel,
+          xlab = "Bartlett FS reliability (partial, continuous)",
+          ylab = "Bartlett FS reliability (approximate, continuous)",
+          "Correlation of reliability of factor scores computed using
+MI modeling or alignment")
+
+scatter_p(df, df$approx_rel, df$approx_ord_rel,
+           xlab = "Bartlett FS reliability (approximate, continuous)",
+           ylab = "EAP FS reliability (approximate, ordinal)",
+          "Correlation of reliability of factor scores computed using
+continuous or ordinal alignment")
+```
+
+
+## Dmacs effect sizes of noninvariance
+
+We use the R package `pinsearch` to compute the Dmacs effect size of noninvariance for each approach. We use the `pin_effsize()` function and `dmacs_ordered()` for the ordinal case. Note that if there are more than two groups, `pin_effsize()` computes the Fmacs effect size when data are continuous, and `fmacs_ordered()` should replace `dmacs_ordered()` in the ordinal case.
+
+### Continuous case
+
+```{r echo = TRUE}
+dmacs_partial <- pinsearch::pin_effsize(fit_partial)
+dmacs_align <- pinsearch::pin_effsize(fit_align)
+```
+### Ordinal case
+```{r}
+# indicate which thresholds belong to which item
+est_align_ord_th_sub <- est_align_ord_th[, -c(3, 8, 13)]
+colnames(est_align_ord_th_sub) <- rep(c(1, 2, 4, 5), 3)
+
+# compute pooled SD for dmacs_ordered()
+vars <- apply(dat[m_items], MARGIN = 2,
+              FUN = \(x) tapply(x, INDEX = dat$sample, FUN = var, na.rm = TRUE)
+              )
+(wgt_mat <- as.matrix(rbind(
+  colSums(!is.na(dat[dat$sample=="ELS", m_items])),
+  colSums(!is.na(dat[dat$sample=="HSLS", m_items]))
+  )))
+item_n <- ifelse(wgt_mat > 0, wgt_mat, NA)
+pooled_sd <- sqrt(colSums(vars * (item_n - 1), na.rm = TRUE) /
+                    colSums(item_n - 1, na.rm = TRUE)
+                  )
+
+dmacs_align_ord <- pinsearch::dmacs_ordered(
+  thresholds = as.matrix(est_align_ord_th_sub),
+  loadings = as.matrix(est_align_ord_lam)[, -3],
+  link = "logit",
+  pooled_item_sd = pooled_sd[-3]
+)
+```
+
+```{r}
+# compute dmacs effect size for ordinal MI modeling approach:
+# first recompute pooled SD since rows with NAs had to be dropped in the ordinal 
+# MI modeling approach
+## note that now we're using d_noNAs as out dataset. 
+
+if(!exists("d_noNAs") | !exists("fit_partial_noNAs")) { # if knitting for the second time, repeatAnalysesNoNAs not run, so we read in files for the following objects 
+  complete_cases <- complete.cases(dat[, m_items]) & dat$sample == "ELS" |
+    complete.cases(dat[, m_items[-3]]) & dat$sample == "HSLS"
+  d_noNAs <- dat[complete_cases, ]
+  fit_partial_noNAs <- readRDS("rds/fit_partial_noNAs.rds")
+  fit_align_noNAs <- readRDS("rds/fit_align_noNAs.rds")
+  est_align_ord_noNAs <- readRDS("rds/est_align_ord_noNAs.rds")
+}
+
+vars_noNAs <- apply(d_noNAs[m_items], MARGIN = 2,
+                    FUN = \(x) tapply(x, INDEX = d_noNAs$sample, 
+                                      FUN = var, na.rm = TRUE)
+              )
+(wgt_mat_noNAs <- as.matrix(rbind(
+  colSums(!is.na(d_noNAs[d_noNAs$sample=="ELS", m_items])),
+  colSums(!is.na(d_noNAs[d_noNAs$sample=="HSLS", m_items]))
+)))
+item_n_noNAs <- ifelse(wgt_mat_noNAs > 0, wgt_mat_noNAs, NA)
+pooled_sd_noNAs <- sqrt(colSums(vars_noNAs * (item_n_noNAs - 1), na.rm = TRUE) /
+                          colSums(item_n_noNAs - 1, na.rm = TRUE)
+                        ) 
+# indicate which thresholds belong to which item
+est_partial_ord_th_sub <- as.matrix(rbind(t(est_partial_ord$ELS$tau)[-c(7:9)],
+                                          t(est_partial_ord$HSLS$tau)))
+colnames(est_partial_ord_th_sub) <- c(rep(1, 3), rep(2, 3), rep(4, 3), rep(5, 3))
+est_partial_ord_lam <- as.matrix(rbind(t(est_partial_ord$ELS$lambda)[-3],
+                                       t(est_partial_ord$HSLS$lambda)))
+
+dmacs_partial_ord <- pinsearch::dmacs_ordered(
+  thresholds = est_partial_ord_th_sub,
+  loadings = est_partial_ord_lam,
+  link = "logit",
+  pooled_item_sd = pooled_sd_noNAs[-3]
+)
+
+```
+
+```{r include = FALSE}
+# repeat for the dataset with no NAs
+dmacs_partial_noNAs <- pinsearch::pin_effsize(fit_partial_noNAs)
+dmacs_align_noNAs <- pinsearch::pin_effsize(fit_align_noNAs)
+
+# ordinal alignment 
+est_align_ord_th_noNAs <- cbind(est_align_ord_noNAs[1:2,c("d1", "d2", "d3")],
+                                est_align_ord_noNAs[3:4,c("d1", "d2", "d3")],
+                                est_align_ord_noNAs[5:6,c("d1", "d2", "d3")],
+                                est_align_ord_noNAs[7:8,c("d1", "d2", "d3")], 
+                                est_align_ord_noNAs[9:10,c("d1", "d2", "d3")])
+est_align_ord_lam_noNAs <- cbind(est_align_ord_noNAs[1:2,c("a1")],
+                                 est_align_ord_noNAs[3:4,c("a1")],
+                                 est_align_ord_noNAs[5:6,c("a1")],
+                                 est_align_ord_noNAs[7:8,c("a1")], 
+                                 est_align_ord_noNAs[9:10,c("a1")])
+# indicate which thresholds belong to which item
+est_align_ord_th_sub_noNAs <- est_align_ord_th_noNAs[, -c(7:9)]
+colnames(est_align_ord_th_sub_noNAs) <- c(rep(1, 3), rep(2, 3), rep(4, 3), rep(5, 3))
+dmacs_align_ord_noNAs <- pinsearch::dmacs_ordered(
+  thresholds = as.matrix(est_align_ord_th_sub_noNAs),
+  loadings = as.matrix(est_align_ord_lam_noNAs)[, -3],
+  link = "logit",
+  pooled_item_sd = pooled_sd_noNAs[-3]
+)
+```
+
+
+```{r echo = FALSE}
+eff_size_tab <- t(rbind(c(round(dmacs_partial, 3), "-", "-"), 
+                        round(dmacs_align, 3),
+                        rep("-", 4),
+                        round(dmacs_align_ord, 3)))
+
+colnames(eff_size_tab) <- c("Partial (M1)", "Approximate (M2)",
+                            "        -       ", "Approximate (M3)")
+rownames(eff_size_tab) <- c("i1", "i2", "i4", "i5")
+
+kbl(eff_size_tab, booktabs = T, align = "c", table.attr = "style='width:70%;'",
+      caption = "Dmacs effect sizes of noninvariance by approach (N = 30,749)", 
+    longtable = TRUE, digits = 2) %>%
+    kable_classic() %>% 
+    add_header_above(c("  " = 1, "Continuous" = 2, "Ordinal" = 2))
+```
+
+```{r echo = FALSE}
+eff_size_tab_noNAs <- t(rbind(c(round(dmacs_partial_noNAs, 3), "-", "-"), 
+                        round(dmacs_align_noNAs, 3),
+                        round(dmacs_partial_ord, 3),
+                        round(dmacs_align_ord_noNAs, 3)))
+
+colnames(eff_size_tab_noNAs) <- c("Partial (M4)", "Approximate (M5)",
+                            "Partial (M6)", "Approximate (M7)")
+rownames(eff_size_tab_noNAs) <- c("i1", "i2", "i4", "i5")
+
+kbl(eff_size_tab_noNAs, booktabs = T, align = "c", table.attr = "style='width:70%;'",
+      caption = "Dmacs effect sizes of noninvariance by approach (N = 29,202)", 
+    longtable = TRUE, digits = 2) %>%
+    kable_classic() %>% 
+    add_header_above(c("  " = 1, "Continuous" = 2, "Ordinal" = 2))
+```
+
+
