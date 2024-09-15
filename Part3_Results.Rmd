@@ -44,9 +44,19 @@ m_items <- paste0("i", 1:5)
 Also source the following R file to repeat the analyses up to this point on the dataset without any NAs for later sensitivity analyses.
 
 ```{r}
-if (!file.exists("rds/score_df_noNAs.rds")) {
+if (!all(file.exists("rds/score_df_noNAs.rds",
+                     "rds/fit_partial_noNAs.rds",
+                     "rds/fit_align_noNAs.rds",
+                     "rds/est_align_ord_noNAs.rds"))) {
   source("code/repeatAnalysesNoNAs.R")
 } else {
+  complete_cases <- complete.cases(dat[, m_items]) & dat$sample == "ELS" |
+    complete.cases(dat[, m_items[-3]]) & dat$sample == "HSLS"
+  d_noNAs <- dat[complete_cases, ]
+  fit_partial_noNAs <- readRDS("rds/fit_partial_noNAs.rds")
+  fit_align_noNAs <- readRDS("rds/fit_align_noNAs.rds")
+  est_align_ord_noNAs <- readRDS("rds/est_align_ord_noNAs.rds")
+
   score_df_noNAs <- readRDS("rds/score_df_noNAs.rds")
 }
 ```
@@ -263,14 +273,7 @@ dmacs_align_ord <- pinsearch::dmacs_ordered(
 # MI modeling approach
 ## note that now we're using d_noNAs as out dataset. 
 
-if(!exists("d_noNAs") | !exists("fit_partial_noNAs")) { # if knitting for the second time, repeatAnalysesNoNAs not run, so we read in files for the following objects 
-  complete_cases <- complete.cases(dat[, m_items]) & dat$sample == "ELS" |
-    complete.cases(dat[, m_items[-3]]) & dat$sample == "HSLS"
-  d_noNAs <- dat[complete_cases, ]
-  fit_partial_noNAs <- readRDS("rds/fit_partial_noNAs.rds")
-  fit_align_noNAs <- readRDS("rds/fit_align_noNAs.rds")
-  est_align_ord_noNAs <- readRDS("rds/est_align_ord_noNAs.rds")
-}
+
 
 vars_noNAs <- apply(d_noNAs[m_items], MARGIN = 2,
                     FUN = \(x) tapply(x, INDEX = d_noNAs$sample, 

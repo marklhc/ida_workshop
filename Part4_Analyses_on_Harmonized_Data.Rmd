@@ -1,0 +1,261 @@
+---
+title: "Part4_Analyses_on_Harmonized_Data"
+date: "2024-09-18"
+output:
+  pdf_document:
+    toc: true
+    latex_engine: xelatex
+---
+
+This file assumes that the code in `Part1_Harmonization_continuous.Rmd`, `Part2_Harmonization_ordinal.Rmd`, and `Part3_Results.Rmd` have been run. These files result in the `df.rds` file that will be read in within the current file. If those files have not been run yet, please run the files before executing the code below. 
+
+# Install and load packages, prepare data.
+
+```{r echo = TRUE, warning=FALSE, message = FALSE}
+library(dplyr)
+library(lavaan)
+library(sirt)
+library(mirt)
+library(kableExtra)
+library(here)
+library(ggplot2)
+library(umx)
+# also install packages: haven, numDeriv
+```
+
+```{r echo = TRUE, message = FALSE, warning = FALSE}
+score_df_cont <- readRDS("rds/score_df_continuous.rds")
+score_df_ord <- readRDS("rds/score_df_ord.rds")
+df <- cbind(score_df_cont, score_df_ord[,c("approx_ord", "approx_ord_SE", "approx_ord_rel", "approx_ord_ev")])
+head(df, 2)
+dim(df)
+```
+
+```{r}
+# outcome variable: dropout
+table(df$dropout)
+round(table(df[df$sample == "ELS", ]$dropout) / 
+        sum(table(df[df$sample == "ELS", ]$dropout)), 3)
+round(table(df[df$sample == "HSLS", ]$dropout) / 
+        sum(table(df[df$sample == "HSLS", ]$dropout)), 3)
+```
+
+# EAP Factor score regression (no reliability adjustment)
+
+## Using EAP scores to predict dropout with probit regression
+
+```{r}
+# Warning: the code requires data to be sorted by `sample` before analyses
+df$dropout <- as.numeric(df$dropout)
+glm_approx_ord_int <- glm("dropout ~ approx_ord * sample", data = df, 
+                      family = "binomial")
+summary(glm_approx_ord_int)
+# interaction not significant
+glm_approx_ord_main <- glm("dropout ~ approx_ord + sample", data = df, 
+                      family = "binomial")
+summary(glm_approx_ord_main)
+```
+
+## Using `umx` with EAP scores (pooled analysis without unreliability adjustment)
+  
+```{r}
+# create a dummy variable for the ELS sample (n_group - 1 dummy variables needed)
+df$ELS <- 0
+df$ELS <- ifelse(df$sample == "ELS", 1, 0)
+```
+
+```{r}
+# Recode discrete variable to be used with OpenMx
+df$dropout_f <- mxFactor(df$dropout, levels = c(0, 1))
+```
+
+```{r warning = FALSE, message = FALSE}
+probitreg_umx_approx_ord <- umxRAM("
+    dropout_f ~ approx_ord + ELS
+    dropout_f ~ 0 * 1
+    dropout_f ~~ 1 * dropout_f
+  ",
+  data = df,
+  tryHard = "ordinal")
+# plot(probitreg_umx_approx_ord) 
+```
+
+# Two-Stage Path Analysis with EAP scores 
+
+Adjusting for measurement error
+  
+```{r warning = FALSE, message = FALSE}
+# drop rows with missing reliability
+df2 <- df[!is.na(df$approx_ord_rel), ]
+
+# Reliability `approx_ord_rel` defined as 1 - approx_ord_SE^2 / psi_align_ord 
+# (computed for each observation using the psi value for the correct group, see 
+# `Part2_Harmonization_ordinal.Rmd` for details)
+
+# Error variance `approx_ord_ev` defined as approx_ord_SE^2 * approx_ord_rel
+
+probitreg_2spa_approx_ord <- umxRAM(
+    "2spa",
+    # Main effects of EAP scores and study indicators
+    umxPath(c("eta", "ELS"), to = "dropout_f"),
+    # Loading = reliability (as definition variable)
+    umxPath("eta", to = "approx_ord", labels = "data.approx_ord_rel", free = FALSE),
+    # Error variance (as definition variable)
+    umxPath(var = "approx_ord", labels = "data.approx_ord_ev", free = FALSE),
+    # Covariances of predictors
+    umxPath(unique.pairs = c("eta", "ELS")),
+    # Means of predictors
+    umxPath(means = c("eta", "ELS")),
+    # For model identification: Fix latent variate to be standard normal
+    umxPath(v1m0 = "dropout_f"),
+    data = df2,
+    tryHard = "ordinal"
+)
+```
+
+
+
+# Bartlett Factor score regression (no reliability adjustment)
+
+## Using Bartlett scores to predict dropout with probit regression
+
+Bartlett scores computed using the approximate invariance model assuming continuous data.
+```{r}
+glm_approx_cont_int <- glm("dropout ~ approx_cont * sample", data = df, 
+                      family = "binomial")
+summary(glm_approx_cont_int)
+# interaction not significant
+glm_approx_cont_main <- glm("dropout ~ approx_cont + sample", data = df, 
+                      family = "binomial")
+summary(glm_approx_cont_main)
+```
+
+
+Bartlett scores computed using the partial invariance model assuming continuous data.
+```{r}
+glm_partial_cont_int <- glm("dropout ~ partial_cont * sample", data = df, 
+                      family = "binomial")
+summary(glm_partial_cont_int)
+# interaction not significant
+glm_partial_cont_main <- glm("dropout ~ partial_cont + sample", data = df, 
+                      family = "binomial")
+summary(glm_partial_cont_main)
+```
+
+## Using `umx` with Bartlett scores (pooled analysis without unreliability adjustment)
+  
+Bartlett scores computed using the approximate invariance model assuming continuous data.
+```{r warning = FALSE, message = FALSE}
+probitreg_umx_approx_cont <- umxRAM("
+    dropout_f ~ approx_cont + ELS
+    dropout_f ~ 0 * 1
+    dropout_f ~~ 1 * dropout_f
+  ",
+  data = df,
+  tryHard = "yes")
+# plot(probitreg_umx_approx_cont) 
+```
+
+Bartlett scores computed using the partial invariance model assuming continuous data.
+```{r warning = FALSE, message = FALSE}
+probitreg_umx_partial_cont <- umxRAM("
+    dropout_f ~ partial_cont + ELS
+    dropout_f ~ 0 * 1
+    dropout_f ~~ 1 * dropout_f
+  ",
+  data = df,
+  tryHard = "yes")
+# plot(probitreg_umx_partial_cont) 
+```
+
+
+
+# Two-Stage Path Analysis with Bartlett scores 
+
+Adjusting for measurement error
+  
+```{r warning = FALSE, message = FALSE}
+# drop rows with missing reliability
+df3 <- df[!is.na(df$approx_rel), ]
+
+# Reliability set to 1 for Bartlett scores ("values = 1" below)
+# Error variance `approx_ev` defined as approx_SE^2
+
+probitreg_2spa_approx_cont <- umxRAM(
+    "2spa",
+    # Main effects of Bartlett scores and study indicators
+    umxPath(c("eta", "ELS"), to = "dropout_f"),
+    # Loading = reliability (as definition variable)
+    umxPath("eta", to = "approx_cont", values = 1, free = FALSE),
+    # Error variance (as definition variable)
+    umxPath(var = "approx_cont", labels = "data.approx_ev", free = FALSE),
+    # Covariances of predictors
+    umxPath(unique.pairs = c("eta", "ELS")),
+    # Means of predictors
+    umxPath(means = c("eta", "ELS")),
+    # For model identification: Fix latent variate to be standard normal
+    umxPath(v1m0 = "dropout_f"),
+    data = df3,
+    tryHard = "yes"
+)
+```
+
+```{r warning = FALSE, message = FALSE}
+# drop rows with missing reliability
+df4 <- df[!is.na(df$partial_rel), ]
+
+# Reliability set to 1 for Bartlett scores ("values = 1" below)
+# Error variance `partial_ev` defined as partial_SE^2
+
+probitreg_2spa_partial_cont <- umxRAM(
+    "2spa",
+    # Main effects of Bartlett scores and study indicators
+    umxPath(c("eta", "ELS"), to = "dropout_f"),
+    # Loading = reliability (as definition variable)
+    umxPath("eta", to = "partial_cont", values = 1, free = FALSE),
+    # Error variance (as definition variable)
+    umxPath(var = "partial_cont", labels = "data.partial_ev", free = FALSE),
+    # Covariances of predictors
+    umxPath(unique.pairs = c("eta", "ELS")),
+    # Means of predictors
+    umxPath(means = c("eta", "ELS")),
+    # For model identification: Fix latent variate to be standard normal
+    umxPath(v1m0 = "dropout_f"),
+    data = df4,
+    tryHard = "yes"
+)
+```
+
+
+# Sensitivity Analysis
+
+Using sum/mean scores
+
+```{r}
+# Scatterplot
+plot(x = df$mean_score, y = df$partial_cont, xlab = "Mean scores", 
+     ylab = "Bartlett scores (partial invariance, continuous)", cex.lab = 0.8)
+cor(df$mean_score, df$partial_cont, use = "complete")
+plot(x = df$mean_score, y = df$approx_ord, xlab = "Mean scores", 
+     ylab = "Bartlett scores (approx. invariance, continuous)", cex.lab = 0.8)
+cor(df$mean_score, df$approx_cont, use = "complete")
+plot(x = df$mean_score, y = df$approx_ord, xlab = "Mean scores",
+     ylab = "EAP scores (approx. invariance, ordinal)", cex.lab = 0.8)
+cor(df$mean_score, df$approx_ord, use = "complete")
+```
+
+### Probit regression with mean scores
+
+Note that the scale of the predictors are different, so the coefficients are not comparable.
+
+```{r}
+# GLM (probit regression); interaction not significant
+glm_meanscore <- glm("dropout ~ mean_score * sample", data = df, 
+                      family = "binomial")
+summary(glm_meanscore)
+# interaction not significant
+glm_meanscore_main <- glm("dropout ~ mean_score + sample", data = df, 
+                      family = "binomial")
+summary(glm_meanscore_main)
+```
+
