@@ -40,13 +40,24 @@ round(table(df[df$sample == "HSLS", ]$dropout) /
         sum(table(df[df$sample == "HSLS", ]$dropout)), 3)
 ```
 
+# Descriptive Statistics
+
+```{r}
+ggplot(df, aes(x = approx_ord)) +
+  geom_histogram() +
+  facet_wrap(~ sample)
+ggplot(df, aes(x = approx_ord, y = dropout, col = sample)) +
+  geom_jitter(width = 0, height = 0.02, alpha = 0.1,
+              size = 0.1) +
+  geom_smooth()
+```
+
 # EAP Factor score regression (no reliability adjustment)
 
 ## Using EAP scores to predict dropout with probit regression
 
 ```{r}
 # Warning: the code requires data to be sorted by `sample` before analyses
-df$dropout <- as.numeric(df$dropout)
 glm_approx_ord_int <- glm("dropout ~ approx_ord * sample", data = df, 
                       family = "binomial")
 summary(glm_approx_ord_int)
@@ -59,9 +70,9 @@ summary(glm_approx_ord_main)
 ## Using `umx` with EAP scores (pooled analysis without unreliability adjustment)
   
 ```{r}
-# create a dummy variable for the ELS sample (n_group - 1 dummy variables needed)
-df$ELS <- 0
-df$ELS <- ifelse(df$sample == "ELS", 1, 0)
+# create a dummy variable for the HSLS sample (n_group - 1 dummy variables needed)
+df$HSLS <- 0
+df$HSLS <- as.integer(df$sample == "HSLS")
 ```
 
 ```{r}
@@ -69,9 +80,9 @@ df$ELS <- ifelse(df$sample == "ELS", 1, 0)
 df$dropout_f <- mxFactor(df$dropout, levels = c(0, 1))
 ```
 
-```{r warning = FALSE, message = FALSE}
+```{r warning = FALSE, message = FALSE, results = "asis"}
 probitreg_umx_approx_ord <- umxRAM("
-    dropout_f ~ approx_ord + ELS
+    dropout_f ~ approx_ord + HSLS
     dropout_f ~ 0 * 1
     dropout_f ~~ 1 * dropout_f
   ",
@@ -84,7 +95,7 @@ probitreg_umx_approx_ord <- umxRAM("
 
 Adjusting for measurement error
   
-```{r warning = FALSE, message = FALSE}
+```{r warning = FALSE, message = FALSE, results = "asis"}
 # drop rows with missing reliability
 df2 <- df[!is.na(df$approx_ord_rel), ]
 
@@ -145,7 +156,7 @@ summary(glm_partial_cont_main)
 ## Using `umx` with Bartlett scores (pooled analysis without unreliability adjustment)
   
 Bartlett scores computed using the approximate invariance model assuming continuous data.
-```{r warning = FALSE, message = FALSE}
+```{r warning = FALSE, message = FALSE, results = "asis"}
 probitreg_umx_approx_cont <- umxRAM("
     dropout_f ~ approx_cont + ELS
     dropout_f ~ 0 * 1
@@ -157,7 +168,7 @@ probitreg_umx_approx_cont <- umxRAM("
 ```
 
 Bartlett scores computed using the partial invariance model assuming continuous data.
-```{r warning = FALSE, message = FALSE}
+```{r warning = FALSE, message = FALSE, results = "asis"}
 probitreg_umx_partial_cont <- umxRAM("
     dropout_f ~ partial_cont + ELS
     dropout_f ~ 0 * 1
@@ -174,7 +185,7 @@ probitreg_umx_partial_cont <- umxRAM("
 
 Adjusting for measurement error
   
-```{r warning = FALSE, message = FALSE}
+```{r warning = FALSE, message = FALSE, results = "asis"}
 # drop rows with missing reliability
 df3 <- df[!is.na(df$approx_rel), ]
 
@@ -200,7 +211,7 @@ probitreg_2spa_approx_cont <- umxRAM(
 )
 ```
 
-```{r warning = FALSE, message = FALSE}
+```{r warning = FALSE, message = FALSE, results = "asis"}
 # drop rows with missing reliability
 df4 <- df[!is.na(df$partial_rel), ]
 
