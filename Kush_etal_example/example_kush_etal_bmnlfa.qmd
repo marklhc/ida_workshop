@@ -10,11 +10,12 @@ format:
 ## Load Packages
 
 ```{r}
-#install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
+# install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
 # cmdstanr::install_cmdstan()
 library(tidyr)
 library(ggplot2)
 library(cmdstanr)
+library(here)
 ```
 
 ## Import Data
@@ -97,7 +98,7 @@ mnlfa_fit$save_object("mnlfa_fit.RDS")
 Using posterior means and SDs
 
 ```{r}
-mnlfa_fit <- readRDS("mnlfa_fit.RDS")
+mnlfa_fit <- readRDS(here::here("Kush_etal_example", "mnlfa_fit.RDS"))
 # Extract factor scores
 fs_draws <- mnlfa_fit$summary("alpha")[c("mean", "sd")]
 ```
@@ -105,7 +106,7 @@ fs_draws <- mnlfa_fit$summary("alpha")[c("mean", "sd")]
 Compare to aligned factor scores
 
 ```{r}
-fsg <- readRDS("fsg.RDS")
+fsg <- readRDS(here::here("Kush_etal_example", "fsg.RDS"))
 plot(na.omit(fsg[, 1]), fs_draws$mean)
 cor(na.omit(fsg[, 1]), fs_draws$mean)
 ```

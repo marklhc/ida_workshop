@@ -55,7 +55,7 @@ library(umx)        # for analyzing harmonized scores
 Data can be downloaded from <https://github.com/jmk7cj/SEM-mnlfa>.
 
 ``` r
-data <- read.csv(here::here("SEM-mnlfa", "data.csv"))
+data <- read.csv(here::here("Kush_etal_example/SEM-mnlfa", "data.csv"))
 # Define grouping variable
 data$group <- data$study_id
 # Sort data by group
@@ -643,7 +643,7 @@ for (g in seq_along(groups)) {
     Iteration: 7, Log-Lik: -743.133, Max-Change: 0.15807
     Iteration: 8, Log-Lik: -742.484, Max-Change: 0.09342
     Iteration: 9, Log-Lik: -742.031, Max-Change: 0.08349
-    Iteration: 10, Log-Lik: -740.559, Max-Change: 0.06007
+    Iteration: 10, Log-Lik: -740.559, Max-Change: 0.06006
     Iteration: 11, Log-Lik: -740.450, Max-Change: 0.04979
     Iteration: 12, Log-Lik: -740.364, Max-Change: 0.04585
     Iteration: 13, Log-Lik: -740.051, Max-Change: 0.01748
@@ -682,12 +682,12 @@ for (g in seq_along(groups)) {
     Warning: data contains response patterns with only NAs
 
 
-    Iteration: 1, Log-Lik: -8039.425, Max-Change: 0.88834
+    Iteration: 1, Log-Lik: -8039.426, Max-Change: 0.88834
     Iteration: 2, Log-Lik: -7405.722, Max-Change: 0.64594
     Iteration: 3, Log-Lik: -7251.327, Max-Change: 0.32330
     Iteration: 4, Log-Lik: -7195.496, Max-Change: 0.30969
-    Iteration: 5, Log-Lik: -7167.166, Max-Change: 0.19066
-    Iteration: 6, Log-Lik: -7152.648, Max-Change: 0.12189
+    Iteration: 5, Log-Lik: -7167.166, Max-Change: 0.19065
+    Iteration: 6, Log-Lik: -7152.648, Max-Change: 0.12190
     Iteration: 7, Log-Lik: -7144.845, Max-Change: 0.08947
     Iteration: 8, Log-Lik: -7139.814, Max-Change: 0.07054
     Iteration: 9, Log-Lik: -7136.303, Max-Change: 0.06529
@@ -731,13 +731,13 @@ for (g in seq_along(groups)) {
     Iteration: 47, Log-Lik: -7123.330, Max-Change: 0.00034
     Iteration: 48, Log-Lik: -7123.330, Max-Change: 0.00010
 
-    Iteration: 1, Log-Lik: -2752.068, Max-Change: 1.00488
+    Iteration: 1, Log-Lik: -2752.067, Max-Change: 1.00488
     Iteration: 2, Log-Lik: -2474.889, Max-Change: 0.48329
     Iteration: 3, Log-Lik: -2397.638, Max-Change: 0.34021
     Iteration: 4, Log-Lik: -2359.032, Max-Change: 0.26210
     Iteration: 5, Log-Lik: -2336.196, Max-Change: 0.24034
     Iteration: 6, Log-Lik: -2321.843, Max-Change: 0.23482
-    Iteration: 7, Log-Lik: -2311.924, Max-Change: 0.19653
+    Iteration: 7, Log-Lik: -2311.923, Max-Change: 0.19653
     Iteration: 8, Log-Lik: -2304.379, Max-Change: 0.18105
     Iteration: 9, Log-Lik: -2298.886, Max-Change: 0.16132
     Iteration: 10, Log-Lik: -2294.630, Max-Change: 0.14412
@@ -911,7 +911,7 @@ for (g in seq_along(groups)) {
 
 ``` r
 # Save factor scores
-saveRDS(fsg, file = "fsg.RDS")
+saveRDS(fsg, file = here::here("Kush_etal_example", "fsg.RDS"))
 ```
 
 ### Reliability
@@ -949,7 +949,8 @@ ggplot(fsg, aes(x = f)) +
 
     `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    Warning: Removed 386 rows containing non-finite values (`stat_bin()`).
+    Warning: Removed 386 rows containing non-finite outside the scale range
+    (`stat_bin()`).
 
 ![](example_kush_etal_alignment_files/figure-commonmark/unnamed-chunk-14-1.png)
 
@@ -1071,7 +1072,7 @@ probitreg_umx <- umxRAM("
     Running m1 with 26 parameters
 
 
-     Lowest minimum so far:  21783.2747623497
+     Lowest minimum so far:  21783.2738419408
 
 
     Beginning fit attempt 1 of at maximum 10 extra tries
@@ -1164,11 +1165,11 @@ probitreg_umx <- umxRAM("
     Running m1 with 26 parameters
 
 
-     Solution found!  Final fit=21783.275 (started at 27940.692)  (11 attempt(s): 1 valid, 10 errors)
+     Solution found!  Final fit=21783.274 (started at 27940.691)  (11 attempt(s): 1 valid, 10 errors)
 
      Start values from best fit:
 
-    -0.151829700462419,0.312103252193123,0.12366338099553,0.597197741937646,-1.59082714570869,1.57529412148427,-0.0978963380889254,0.101196426671401,0.0318780389919496,-0.0545154954988001,0.249480525950573,-0.115526480559778,-0.018460836606578,-0.0772428154812812,0.135731566059289,0.00395646182689006,-0.00456384922002904,-0.018972817221681,-0.00649126869478588,0.0382260084127496,-0.853412660222693,0.113828675840344,0.477282233105475,0.160796164634099,0.0405475051269377,-0.589071915427726
+    -0.151829728361806,0.312103303403434,0.123663396514519,0.59719771468182,-1.59082705147643,1.57529367416824,-0.0978962912890579,0.101196426672952,0.0318780454014536,-0.0545154955009099,0.249480525965828,-0.115526505428762,-0.0184608366105559,-0.0772428154887461,0.135731566055389,0.00395648265360363,-0.00456384921796239,-0.0189728172259639,-0.00649126868932662,0.0382260084122987,-0.853412422675654,0.113828675855486,0.477282233116406,0.160796164685984,0.0405475050883824,-0.5890719172351
 
     ?umxSummary options: std=T|F', digits=, report= 'html', filter= 'NS' & more
 
@@ -1275,7 +1276,7 @@ probitreg_2spa <- umxRAM(
     Running 2spa with 26 parameters
 
 
-     Lowest minimum so far:  20052.8055054881
+     Lowest minimum so far:  20052.804644306
 
 
     Beginning fit attempt 1 of at maximum 10 extra tries
@@ -1368,11 +1369,11 @@ probitreg_2spa <- umxRAM(
     Running 2spa with 26 parameters
 
 
-     Solution found!  Final fit=20052.806 (started at 27663.785)  (11 attempt(s): 1 valid, 10 errors)
+     Solution found!  Final fit=20052.805 (started at 27663.782)  (11 attempt(s): 1 valid, 10 errors)
 
      Start values from best fit:
 
-    0.200684426983861,0.0441311908600139,0.575825376892984,-1.84038715394607,-0.145034829804772,0.0529957635770528,-0.0279008000300894,0.249990593695406,-0.0100727266702378,-0.0891429069082674,0.147211723328222,-0.00245905445138492,-0.0217625071252046,-0.00785679134164797,0.0418776282735316,-0.0555994488409809,-0.00205583447242914,-0.18018548527998,0.00376635198248906,2.2730831864825,0.0561481636160452,0.496911911360759,0.179393675078171,0.0437955135402106,-0.970162315671518,-0.621613908502643
+    0.200684499191218,0.0441312015349439,0.57582537867712,-1.84038704471544,-0.145034856203399,0.0529957636980422,-0.0279008000027353,0.249990593054075,-0.0100727267085189,-0.0891429066548291,0.147211723221714,-0.00245905454482547,-0.0217625073075717,-0.0078567912191839,0.0418776283169375,-0.0555994202603408,-0.0020558207128948,-0.180185484635762,0.00376637591797103,2.27308253064221,0.0561481634372279,0.496911911347467,0.179393675442706,0.043795513404219,-0.970162051290968,-0.621613903049458
 
     ?umxSummary options: std=T|F', digits=, report= 'html', filter= 'NS' & more
 

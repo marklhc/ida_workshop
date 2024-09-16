@@ -195,9 +195,8 @@ for (g in seq_along(groups)) {
 ```
 
 ```{r}
-#| eval: false
 # Save factor scores
-saveRDS(fsg, file = "fsg.RDS")
+saveRDS(fsg, file = here::here("Kush_etal_example", "fsg.RDS"))
 ```
 
 ### Reliability

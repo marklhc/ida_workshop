@@ -12,6 +12,8 @@
 ## Load Packages
 
 ``` r
+# install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
+# cmdstanr::install_cmdstan()
 library(tidyr)
 library(ggplot2)
 library(cmdstanr)
@@ -21,16 +23,22 @@ library(cmdstanr)
 
     - CmdStanR documentation and vignettes: mc-stan.org/cmdstanr
 
-    - CmdStan path: /home/markl/.cmdstan/cmdstan-2.35.0
+    - CmdStan path: /home/hokchiol/.cmdstan/cmdstan-2.35.0
 
     - CmdStan version: 2.35.0
+
+``` r
+library(here)
+```
+
+    here() starts at /media/hokchiol/DATADRIVE2/Insync/hokchiol@usc.edu/OneDrive Biz/Research/ida_workshop
 
 ## Import Data
 
 Data can be downloaded from <https://github.com/jmk7cj/SEM-mnlfa>.
 
 ``` r
-data <- read.csv(here::here("SEM-mnlfa", "data.csv"))
+data <- read.csv(here::here("Kush_etal_example/SEM-mnlfa", "data.csv"))
 # Define grouping variable
 data$group <- data$study_id
 # Sort data by group
@@ -212,7 +220,7 @@ mnlfa_fit$save_object("mnlfa_fit.RDS")
 Using posterior means and SDs
 
 ``` r
-mnlfa_fit <- readRDS("mnlfa_fit.RDS")
+mnlfa_fit <- readRDS(here::here("Kush_etal_example", "mnlfa_fit.RDS"))
 # Extract factor scores
 fs_draws <- mnlfa_fit$summary("alpha")[c("mean", "sd")]
 ```
@@ -220,7 +228,7 @@ fs_draws <- mnlfa_fit$summary("alpha")[c("mean", "sd")]
 Compare to aligned factor scores
 
 ``` r
-fsg <- readRDS("fsg.RDS")
+fsg <- readRDS(here::here("Kush_etal_example", "fsg.RDS"))
 plot(na.omit(fsg[, 1]), fs_draws$mean)
 ```
 
