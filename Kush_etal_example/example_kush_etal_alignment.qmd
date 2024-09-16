@@ -23,7 +23,7 @@ library(umx)        # for analyzing harmonized scores
 Data can be downloaded from <https://github.com/jmk7cj/SEM-mnlfa>.
 
 ```{r}
-data <- read.csv(here::here("SEM-mnlfa", "data.csv"))
+data <- read.csv(here::here("Kush_etal_example/SEM-mnlfa", "data.csv"))
 # Define grouping variable
 data$group <- data$study_id
 # Sort data by group
