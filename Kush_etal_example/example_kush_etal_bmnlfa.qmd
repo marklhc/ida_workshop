@@ -10,6 +10,8 @@ format:
 ## Load Packages
 
 ```{r}
+#install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
+# cmdstanr::install_cmdstan()
 library(tidyr)
 library(ggplot2)
 library(cmdstanr)
@@ -20,7 +22,7 @@ library(cmdstanr)
 Data can be downloaded from <https://github.com/jmk7cj/SEM-mnlfa>.
 
 ```{r}
-data <- read.csv(here::here("SEM-mnlfa", "data.csv"))
+data <- read.csv(here::here("Kush_etal_example/SEM-mnlfa", "data.csv"))
 # Define grouping variable
 data$group <- data$study_id
 # Sort data by group
